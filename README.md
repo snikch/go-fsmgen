@@ -17,7 +17,7 @@ For a full example, see the [examples](./examples) directory.
 
 ```go
 func main() {
-	gen := fsmgen.New("audio_player", "init", "loading", "playing", "paused")
+	gen := fsmgen.New("audio_player", AudioPlayerState{}, AudioPlayerEnvironment{}, "init", "loading", "playing", "paused")
 	gen.PackageName = "main"
 	gen.AddEvent(fsmgen.NewEvent("load", EventLoad{}).FromAny().To("loading"))
 	gen.AddEvent(fsmgen.NewEvent("play", EventPlay{}).From("paused", "loading").To("playing"))
@@ -54,9 +54,10 @@ func main() {
 }
 
 func NewMachine() *AudioPlayerMachine {
+	env := AudioPlayerEnvironment{Logger: log.New(os.Stdout, "fsm ", 0)}
 	machine := NewAudioPlayerMachine(&AudioPlayerState{
 		Player: &StringAudioPlayer{},
-	})
+	}, env)
 	machine.LoadAction = func(ctx AudioPlayerMachineContext, state *AudioPlayerState, ev EventLoad) error {
 		state.file = ev.File
 		return nil
@@ -65,7 +66,8 @@ func NewMachine() *AudioPlayerMachine {
 		state.Message = ev.Message
 		return nil
 	}
-	machine.OnStateLoading = func(ctx AudioPlayerMachineContext, state AudioPlayerState) error {
+	machine.OnStateLoading = func(ctx AudioPlayerMachineContext, env AudioPlayerEnvironment, state AudioPlayerState) error {
+		env.Logger.Print("Did enter State Loading")
 		err := state.Player.Load(state.file)
 		if err != nil {
 			return ctx.TriggerError(EventError{
@@ -74,7 +76,8 @@ func NewMachine() *AudioPlayerMachine {
 		}
 		return ctx.TriggerPlay(EventPlay{})
 	}
-	machine.OnStatePlaying = func(ctx AudioPlayerMachineContext, state AudioPlayerState) error {
+	machine.OnStatePlaying = func(ctx AudioPlayerMachineContext, env AudioPlayerEnvironment, state AudioPlayerState) error {
+		env.Logger.Print("Did enter State Playing")
 		err := state.Player.Play()
 		if err != nil {
 			return ctx.TriggerError(EventError{
@@ -83,7 +86,8 @@ func NewMachine() *AudioPlayerMachine {
 		}
 		return nil
 	}
-	machine.OnStatePaused = func(ctx AudioPlayerMachineContext, state AudioPlayerState) error {
+	machine.OnStatePaused = func(ctx AudioPlayerMachineContext, env AudioPlayerEnvironment, state AudioPlayerState) error {
+		env.Logger.Print("Did enter State Paused")
 		err := state.Player.Pause()
 		if err != nil {
 			return ctx.TriggerError(EventError{
@@ -98,10 +102,13 @@ func NewMachine() *AudioPlayerMachine {
 
 ```
 $ ./audioplayer
-2020/11/08 17:23:39 Loading
-2020/11/08 17:23:39 Play
-2020/11/08 17:23:41 Pause
-2020/11/08 17:23:41 error: invalid transition: no transition target from paused via pause
+fsm Did enter State Loading
+2020/11/13 06:35:38 Loading
+fsm Did enter State Playing
+2020/11/13 06:35:38 Play
+fsm Did enter State Paused
+2020/11/13 06:35:40 Pause
+2020/11/13 06:35:40 error: invalid transition: no transition target from paused via pause
 ```
 ## See Also
 

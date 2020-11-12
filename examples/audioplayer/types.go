@@ -47,5 +47,5 @@ type AudioPlayerState struct {
 }
 
 type AudioPlayerEnvironment struct {
-	Logger log.Logger
+	Logger *log.Logger
 }
