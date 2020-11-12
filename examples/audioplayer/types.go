@@ -45,3 +45,7 @@ type AudioPlayerState struct {
 	Player  AudioPlayer
 	Message string
 }
+
+type AudioPlayerEnvironment struct {
+	Logger log.Logger
+}
