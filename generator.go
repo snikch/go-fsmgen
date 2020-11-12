@@ -206,7 +206,7 @@ func (machine *{{ .ExportedName .Name }}Machine) didEnterState(ctx context.Conte
 		if machine.OnState{{ $.ExportedName $state }} == nil {
 			break
 		}
-		return machine.OnState{{ $.ExportedName $state }}(newAudioPlayerContext(ctx, machine), *machine.State)
+		return machine.OnState{{ $.ExportedName $state }}(new{{ $.ExportedName $state }}Context(ctx, machine), *machine.State)
 	{{- end }}
 	}
 	return nil
