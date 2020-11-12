@@ -22,19 +22,32 @@ type Generator struct {
 	States []string
 	// Events is a slice of all possible events that can occur in the state machine.
 	Events   []*Event
-	stateObj reflect.Type
-	envObj   reflect.Type
+	stateObj string
+	envObj   string
 }
 
-// New returns a new Generator with the supplied name and states. The first supplied state is the initial state.
+// New returns a new Generator with the supplied name, types and states. The first supplied state is the initial state.
+// The stateObj and envObj values can be either a struct, pointer to a struct or a string naming a type. Unfortunately
+// you cannot pass an interface, so if this is required simply pass in the interface's name as a string.
 func New(name string, stateObj interface{}, envObj interface{}, states ...string) *Generator {
+	stateObjStr, envObjStr := "", ""
+	if str, ok := stateObj.(string); ok {
+		stateObjStr = str
+	} else {
+		stateObjStr = reflect.TypeOf(stateObj).Name()
+	}
+	if str, ok := envObj.(string); ok {
+		envObjStr = str
+	} else {
+		envObjStr = reflect.TypeOf(envObj).Name()
+	}
 	return &Generator{
 		Name:        name,
 		PackageName: name,
 		Filename:    name + ".generated.go",
 		States:      states,
-		stateObj:    reflect.TypeOf(stateObj),
-		envObj:      reflect.TypeOf(envObj),
+		stateObj:    stateObjStr,
+		envObj:      envObjStr,
 	}
 }
 
@@ -64,11 +77,11 @@ type tmplGenerator struct {
 }
 
 func (gen *tmplGenerator) EnvObjName() string {
-	return gen.envObj.Name()
+	return gen.envObj
 }
 
 func (gen *tmplGenerator) StateObjName() string {
-	return gen.stateObj.Name()
+	return gen.stateObj
 }
 
 func (gen *tmplGenerator) ExportedName(str string) string {
