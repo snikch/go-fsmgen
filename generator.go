@@ -24,7 +24,7 @@ type Generator struct {
 	Events []*Event
 }
 
-// New returns a new Generator with the supplied name and states. The first supplied state is the initial stat.
+// New returns a new Generator with the supplied name and states. The first supplied state is the initial state.
 func New(name string, states ...string) *Generator {
 	return &Generator{
 		Name:        name,
@@ -46,7 +46,7 @@ func (gen *Generator) Write() error {
 		return err
 	}
 	out := &bytes.Buffer{}
-	err = t.Execute(out, tmplGenerator{Generator: gen})
+	err = t.Execute(out, &tmplGenerator{Generator: gen})
 	if err != nil {
 		return err
 	}
@@ -65,6 +65,7 @@ func (gen *tmplGenerator) ExportedName(str string) string {
 func (gen *tmplGenerator) UnexportedName(str string) string {
 	return strcase.ToLowerCamel(str)
 }
+
 func (gen *tmplGenerator) TransitionMap() map[string]map[string]string {
 	out := map[string]map[string]string{
 		"": {},
