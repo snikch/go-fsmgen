@@ -9,7 +9,9 @@ import (
 )
 
 func main() {
-	gen := fsmgen.New("audio_player", AudioPlayerState{}, AudioPlayerEnvironment{}, "init", "loading", "playing", "paused")
+	gen := fsmgen.New("audio_player", AudioPlayerState{}, "AudioPlayerEnvironment", "init", "loading", "playing", "paused")
+	// This would work too
+	//gen := fsmgen.New("audio_player", AudioPlayerState{}, AudioPlayerEnvironment{}, "init", "loading", "playing", "paused")
 	gen.PackageName = "main"
 	gen.AddEvent(fsmgen.NewEvent("load", EventLoad{}).FromAny().To("loading"))
 	gen.AddEvent(fsmgen.NewEvent("play", EventPlay{}).From("paused", "loading").To("playing"))
