@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"os"
 	"time"
 )
 
@@ -28,9 +29,10 @@ func main() {
 }
 
 func NewMachine() *AudioPlayerMachine {
+	env := AudioPlayerEnvironment{Logger: log.New(os.Stdout, "fsm ", 0)}
 	machine := NewAudioPlayerMachine(&AudioPlayerState{
 		Player: &StringAudioPlayer{},
-	})
+	}, env)
 	machine.LoadAction = func(ctx AudioPlayerMachineContext, state *AudioPlayerState, ev EventLoad) error {
 		state.file = ev.File
 		return nil
@@ -39,7 +41,8 @@ func NewMachine() *AudioPlayerMachine {
 		state.Message = ev.Message
 		return nil
 	}
-	machine.OnStateLoading = func(ctx AudioPlayerMachineContext, state AudioPlayerState) error {
+	machine.OnStateLoading = func(ctx AudioPlayerMachineContext, env AudioPlayerEnvironment, state AudioPlayerState) error {
+		env.Logger.Print("Did enter State Loading")
 		err := state.Player.Load(state.file)
 		if err != nil {
 			return ctx.TriggerError(EventError{
@@ -48,7 +51,8 @@ func NewMachine() *AudioPlayerMachine {
 		}
 		return ctx.TriggerPlay(EventPlay{})
 	}
-	machine.OnStatePlaying = func(ctx AudioPlayerMachineContext, state AudioPlayerState) error {
+	machine.OnStatePlaying = func(ctx AudioPlayerMachineContext, env AudioPlayerEnvironment, state AudioPlayerState) error {
+		env.Logger.Print("Did enter State Playing")
 		err := state.Player.Play()
 		if err != nil {
 			return ctx.TriggerError(EventError{
@@ -57,7 +61,8 @@ func NewMachine() *AudioPlayerMachine {
 		}
 		return nil
 	}
-	machine.OnStatePaused = func(ctx AudioPlayerMachineContext, state AudioPlayerState) error {
+	machine.OnStatePaused = func(ctx AudioPlayerMachineContext, env AudioPlayerEnvironment, state AudioPlayerState) error {
+		env.Logger.Print("Did enter State Paused")
 		err := state.Player.Pause()
 		if err != nil {
 			return ctx.TriggerError(EventError{

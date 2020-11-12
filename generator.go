@@ -146,13 +146,14 @@ type {{ .ExportedName .Name }}Machine struct {
 	CurrentState string
 	State *{{ .StateObjName }}
 
+	env {{ .EnvObjName }}
 	transitions  map[string]map[string]string
 
-{{- range $event := .Events }}
+{{ range $event := .Events }}
 	{{ $.ExportedName $event.Name }}Action func(ctx {{ $.ExportedName $.Name }}MachineContext, state *{{ $.StateObjName }}, ev {{ $event.ObjName.Name }}) error
 {{- end }}
 {{ range $state := .States }}
-	OnState{{ $.ExportedName $state }} func(ctx {{ $.ExportedName $.Name }}MachineContext, state {{ $.StateObjName }}) error
+	OnState{{ $.ExportedName $state }} func(ctx {{ $.ExportedName $.Name }}MachineContext, env {{ $.EnvObjName }}, state {{ $.StateObjName }}) error
 {{- end }}
 }
 
@@ -184,11 +185,12 @@ func (ctx {{ $.UnexportedName $.Name }}MachineContext) Trigger{{ $.ExportedName 
 }
 {{- end }}
 
-func New{{ .ExportedName .Name }}Machine(state *{{ .StateObjName }}) *{{ .ExportedName  .Name}}Machine{
+func New{{ .ExportedName .Name }}Machine(state *{{ .StateObjName }}, env {{ .EnvObjName }}) *{{ .ExportedName  .Name}}Machine{
 	return &{{ .ExportedName .Name }}Machine{
-		State: state,
+		State:        state,
 		CurrentState: "{{ (index .States 0) }}",
-		transitions: map[string]map[string]string{
+		env:          env,
+		transitions:  map[string]map[string]string{
 			{{- range $from, $events := .TransitionMap }}
 				"{{ $from }}": {
 				{{- range $event, $target := $events }}
@@ -219,7 +221,7 @@ func (machine *{{ .ExportedName .Name }}Machine) didEnterState(ctx context.Conte
 		if machine.OnState{{ $.ExportedName $state }} == nil {
 			break
 		}
-		return machine.OnState{{ $.ExportedName $state }}(new{{ $.ExportedName $.Name }}Context(ctx, machine), *machine.State)
+		return machine.OnState{{ $.ExportedName $state }}(new{{ $.ExportedName $.Name }}Context(ctx, machine), machine.env, *machine.State)
 	{{- end }}
 	}
 	return nil
