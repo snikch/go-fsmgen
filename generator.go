@@ -122,6 +122,8 @@ func (ev *Event) To(to string) *Event {
 const tmpl = `
 package {{ .PackageName }}
 
+// Code generated go-fsmgen DO NOT EDIT.
+
 import (
 	"context"
 	"errors"

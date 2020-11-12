@@ -1,6 +1,8 @@
 
 package main
 
+// Code generated go-fsmgen DO NOT EDIT.
+
 import (
 	"context"
 	"errors"
