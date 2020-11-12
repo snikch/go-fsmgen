@@ -21,16 +21,20 @@ type Generator struct {
 	// States contains all of the state names that the state machine may be in.
 	States []string
 	// Events is a slice of all possible events that can occur in the state machine.
-	Events []*Event
+	Events   []*Event
+	stateObj reflect.Type
+	envObj   reflect.Type
 }
 
 // New returns a new Generator with the supplied name and states. The first supplied state is the initial state.
-func New(name string, states ...string) *Generator {
+func New(name string, stateObj interface{}, envObj interface{}, states ...string) *Generator {
 	return &Generator{
 		Name:        name,
 		PackageName: name,
 		Filename:    name + ".generated.go",
 		States:      states,
+		stateObj:    reflect.TypeOf(stateObj),
+		envObj:      reflect.TypeOf(envObj),
 	}
 }
 
@@ -54,8 +58,17 @@ func (gen *Generator) Write() error {
 	return err
 }
 
+// tmplGenerator is a wrapper around the Generator type that provides methods only intended for the template to use.
 type tmplGenerator struct {
 	*Generator
+}
+
+func (gen *tmplGenerator) EnvObjName() string {
+	return gen.envObj.Name()
+}
+
+func (gen *tmplGenerator) StateObjName() string {
+	return gen.stateObj.Name()
 }
 
 func (gen *tmplGenerator) ExportedName(str string) string {
@@ -131,15 +144,15 @@ import (
 
 type {{ .ExportedName .Name }}Machine struct {
 	CurrentState string
-	State *{{ .ExportedName .Name }}State
+	State *{{ .StateObjName }}
 
 	transitions  map[string]map[string]string
 
 {{- range $event := .Events }}
-	{{ $.ExportedName $event.Name }}Action func(ctx {{ $.ExportedName $.Name }}MachineContext, state *{{ $.ExportedName $.Name }}State, ev {{ $event.ObjName.Name }}) error
+	{{ $.ExportedName $event.Name }}Action func(ctx {{ $.ExportedName $.Name }}MachineContext, state *{{ $.StateObjName }}, ev {{ $event.ObjName.Name }}) error
 {{- end }}
 {{ range $state := .States }}
-	OnState{{ $.ExportedName $state }} func(ctx {{ $.ExportedName $.Name }}MachineContext, state {{ $.ExportedName $.Name }}State) error
+	OnState{{ $.ExportedName $state }} func(ctx {{ $.ExportedName $.Name }}MachineContext, state {{ $.StateObjName }}) error
 {{- end }}
 }
 
@@ -171,7 +184,7 @@ func (ctx {{ $.UnexportedName $.Name }}MachineContext) Trigger{{ $.ExportedName 
 }
 {{- end }}
 
-func New{{ .ExportedName .Name }}Machine(state *{{ .ExportedName .Name }}State) *{{ .ExportedName  .Name}}Machine{
+func New{{ .ExportedName .Name }}Machine(state *{{ .StateObjName }}) *{{ .ExportedName  .Name}}Machine{
 	return &{{ .ExportedName .Name }}Machine{
 		State: state,
 		CurrentState: "{{ (index .States 0) }}",
