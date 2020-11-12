@@ -16,7 +16,7 @@ type Generator struct {
 	Name string
 	// PackageName defines the name of the package the generated file belongs to. Defaults to Name.
 	PackageName string
-	// Filename defines where the state machine file will be written to. Defaults to Name.gen.go
+	// Filename defines where the state machine file will be written to. Defaults to Name.generated.go
 	Filename string
 	// States contains all of the state names that the state machine may be in.
 	States []string
@@ -29,7 +29,7 @@ func New(name string, states ...string) *Generator {
 	return &Generator{
 		Name:        name,
 		PackageName: name,
-		Filename:    name + ".gen.go",
+		Filename:    name + ".generated.go",
 		States:      states,
 	}
 }
