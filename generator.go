@@ -216,7 +216,7 @@ func (machine *{{ .ExportedName .Name }}Machine) didEnterState(ctx context.Conte
 	return nil
 }
 {{ range $event := .Events }}
-func (machine *{{ $.ExportedName $.Name }}Machine) Trigger{{ $.ExportedName $.Name }} (ctx context.Context, ev {{ $event.ObjName.Name }}) error {
+func (machine *{{ $.ExportedName $.Name }}Machine) Trigger{{ $.ExportedName $event.Name }} (ctx context.Context, ev {{ $event.ObjName.Name }}) error {
 	target, err := machine.getState("{{ $event.Name }}")
 	if err != nil {
 	return err
