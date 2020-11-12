@@ -206,13 +206,13 @@ func (machine *{{ .ExportedName .Name }}Machine) didEnterState(ctx context.Conte
 		if machine.OnState{{ $.ExportedName $state }} == nil {
 			break
 		}
-		return machine.OnState{{ $.ExportedName $state }}(new{{ $.ExportedName $state }}Context(ctx, machine), *machine.State)
+		return machine.OnState{{ $.ExportedName $state }}(new{{ $.ExportedName $.Name }}Context(ctx, machine), *machine.State)
 	{{- end }}
 	}
 	return nil
 }
 {{ range $event := .Events }}
-func (machine *{{ $.ExportedName $.Name }}Machine) Trigger{{ $.ExportedName $.Name }} (ctx context.Context, ev {{ $event.ObjName.Name }}) error {
+func (machine *{{ $.ExportedName $.Name }}Machine) Trigger{{ $.ExportedName $event.Name }} (ctx context.Context, ev {{ $event.ObjName.Name }}) error {
 	target, err := machine.getState("{{ $event.Name }}")
 	if err != nil {
 	return err
