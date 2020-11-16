@@ -190,7 +190,7 @@ func new{{ .ExportedName .Name }}Context(ctx context.Context, machine *{{ .Expor
 }
 
 func (ctx {{ .UnexportedName .Name }}MachineContext) Context() context.Context {
-	return context.Background()
+	return ctx.ctx
 }
 {{ range $event := .Events }}
 func (ctx {{ $.UnexportedName $.Name }}MachineContext) Trigger{{ $.ExportedName $event.Name }}(ev {{ $event.ObjName.Name }}) error {
