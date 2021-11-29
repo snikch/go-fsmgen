@@ -47,7 +47,7 @@ func main() {
 	if err != nil {
 		log.Panic(err)
 	}
-    err = machine.TriggerPause(ctx, EventPause{})
+	err = machine.TriggerPause(ctx, EventPause{})
 	if err != nil {
 		log.Print("error: " + err.Error())
 	}
