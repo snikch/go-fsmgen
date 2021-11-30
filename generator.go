@@ -187,6 +187,10 @@ func New{{ .ExportedName .Name }}Machine(state *{{ .ExportedName .Name }}State) 
 	}
 }
 
+func (machine *{{ .ExportedName .Name }}Machine) Start(ctx context.Context) (error) {
+	return machine.didEnterState(ctx)
+}
+
 func (machine *{{ .ExportedName .Name }}Machine) getState(event string) (string, error) {
 	target := machine.transitions[machine.CurrentState][event]
 	if target != "" {
@@ -206,7 +210,7 @@ func (machine *{{ .ExportedName .Name }}Machine) didEnterState(ctx context.Conte
 		if machine.OnState{{ $.ExportedName $state }} == nil {
 			break
 		}
-		return machine.OnState{{ $.ExportedName $state }}(new{{ $.ExportedName $state }}Context(ctx, machine), *machine.State)
+		return machine.OnState{{ $.ExportedName $state }}(new{{ $.ExportedName $.Name }}Context(ctx, machine), *machine.State)
 	{{- end }}
 	}
 	return nil
