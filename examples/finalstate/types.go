@@ -1,10 +1,10 @@
-package main
+package finalstate
 
-//go:generate go run gen.go types.go
-type InitFinalState struct {
+//go:generate go run gen/gen.go
+type State struct {
 }
 
-type InitFinalEnvironment struct{}
+type Environment struct{}
 
 const (
 	StateInit    = "init"

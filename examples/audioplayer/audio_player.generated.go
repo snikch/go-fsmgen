@@ -48,7 +48,7 @@ func newAudioPlayerContext(ctx context.Context, machine *AudioPlayerMachine) Aud
 }
 
 func (ctx audioPlayerMachineContext) Context() context.Context {
-	return context.Background()
+	return ctx.ctx
 }
 
 func (ctx audioPlayerMachineContext) TriggerLoad(ev EventLoad) error {
@@ -87,6 +87,10 @@ func NewAudioPlayerMachine(state *AudioPlayerState, env AudioPlayerEnvironment) 
 				},
 		},
 	}
+}
+
+func (machine *AudioPlayerMachine) Start(ctx context.Context) (error) {
+	return machine.didEnterState(ctx)
 }
 
 func (machine *AudioPlayerMachine) getState(event string) (string, error) {
